@@ -1,4 +1,4 @@
-import { db, state, setPlayIdx, setIsMuted } from './shared/config.js';
+import { db, state, setPlayIdx, setIsMuted, DOMAIN } from './shared/config.js';
 import { dbGet, sub } from './shared/db.js';
 import { notify } from './shared/utils.js';
 import { initIdentity, loadUsers } from './components/identity.js';
@@ -27,6 +27,9 @@ async function fetchQuote() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('domain_name').innerText = DOMAIN
+
+
   // Setup clock cycles
   tickClock();
   setInterval(tickClock, 1000);

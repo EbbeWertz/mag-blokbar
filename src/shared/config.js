@@ -1,5 +1,6 @@
 export const SUPA_URL = 'https://fpyhywgluieifxeianpp.supabase.co';
 export const SUPA_KEY = 'sb_publishable_CkawR7F0S7KgkmxwtrH3bA_CLNLy5gE';
+export const DOMAIN = 'https://ebbewertz.github.io/MAG-Blokbar'
 
 export let db = null;
 try {
