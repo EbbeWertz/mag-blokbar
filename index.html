@@ -1,111 +1,133 @@
 <!DOCTYPE html>
 <html lang="nl">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MAG Blokbar 📚 - Dashboard</title>
-  <link rel="shortcut icon" href="assets/256_schild.png" type="image/x-icon">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;800&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAG Blokbar 📚 - Dashboard</title>
+    <link rel="shortcut icon" href="assets/256_schild.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;800&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="css/shared.css">
+    <link rel="stylesheet" href="css/dashboard.css">
 </head>
-<body style="background: #0f0a07;"> <div id="mute-banner">🔇 Stilte gevraagd — respecteer de mute. Vraag toestemming als je het geluid wil aanzetten.</div>
 
-  <div id="id-modal" class="gone">
-    <div class="id-box">
-      <img src="256_schild.png" class="id-logo" alt="Blokbar">
-      <div class="id-title">Welkom in de Blokbar!</div>
-      <div class="id-sub">Voer je naam in om jezelf aan te melden.<br>Je studietijd wordt automatisch bijgehouden.</div>
-      <input type="text" id="inp-name" class="inp" placeholder="Jouw naam..." maxlength="28" style="margin-bottom:0;">
-      <button class="btn-primary" id="btn-name-ok">Aanmelden →</button>
+<body style="background: #0f0a07;">
+    <div id="mute-banner">🔇 Stilte gevraagd — respecteer de mute. Vraag toestemming als je het geluid wil aanzetten.
     </div>
-  </div>
 
-  <div id="page-dashboard" class="page active">
-    <div class="dash-grid">
-
-      <div class="dash-header">
-        <img src="assets/256_schild.png" class="dash-header-logo" alt="Logo">
-        <div class="dash-title-block">
-          <div class="dash-title">Blokbar</div>
-          <div class="dash-sub" id="d-welcome">Aanmelden...</div>
+    <div id="id-modal" class="gone">
+        <div class="id-box">
+            <img src="256_schild.png" class="id-logo" alt="Blokbar">
+            <div class="id-title">Welkom in de Blokbar!</div>
+            <div class="id-sub">Voer je naam in om jezelf aan te melden.<br>Je studietijd wordt automatisch bijgehouden.
+            </div>
+            <input type="text" id="inp-name" class="inp" placeholder="Jouw naam..." maxlength="28"
+                style="margin-bottom:0;">
+            <button class="btn-primary" id="btn-name-ok">Aanmelden →</button>
         </div>
-        <div class="hdr-right">
-          <button class="btn-link btn-mute" id="d-mute">🔊 Geluid</button>
-          <a href="scherm.html" class="btn-link btn-screen">📺 Scherm →</a>
-        </div>
-      </div>
-
-      <div class="dash-main">
-        <div class="card">
-          <div class="card-header">
-            <div class="sec-label">⏱ Studietimer</div>
-            <button class="btn-action btn-go" id="d-study-btn">▶ Start</button>
-          </div>
-          <div class="study-row">
-            <div class="dot" id="d-dot"></div>
-            <div class="study-time" id="d-time">0:00:00</div>
-            <div class="study-state" id="d-state">Niet bezig</div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <div class="sec-label">⏰ Mijn timers</div>
-          </div>
-          <div class="item-list" id="d-timers"><div class="empty-msg">Geen timers actief.</div></div>
-          <div class="add-row">
-            <input type="text" class="inp" id="t-label" placeholder="Timer naam..." style="flex:1;margin:0;">
-            <select class="inp-sm" id="t-min">
-              <option value="5">5m</option>
-              <option value="10">10m</option>
-              <option value="15" selected>15m</option>
-              <option value="20">20m</option>
-              <option value="25">25m</option>
-              <option value="30">30m</option>
-              <option value="45">45m</option>
-              <option value="60">60m</option>
-              <option value="90">90m</option>
-            </select>
-            <button class="btn-sm" id="d-timer-add">+ Timer</button>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <div class="sec-label">🎵 Achtergrond</div>
-            <button class="btn-sm" id="d-skip">⏭ Volgende</button>
-          </div>
-          <div class="item-list" id="d-playlist"><div class="empty-msg">Geen video's. Voeg een YouTube of video URL toe.</div></div>
-          <div class="add-row" style="flex-wrap:wrap;gap:0.4rem;">
-            <input type="text" class="inp" id="p-url" placeholder="YouTube / Internet Archive / video URL..." style="margin:0;flex:1 1 200px;">
-            <input type="text" class="inp" id="p-title" placeholder="Naam..." style="margin:0;flex:0 0 120px;">
-            <button class="btn-sm" id="d-playlist-add">+ Toevoegen</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="dash-side">
-        <div class="side-section">
-          <div class="sec-label" style="margin-bottom:0.55rem;">👥 Aanwezig</div>
-          <div id="d-online"><div class="empty-msg">Laden...</div></div>
-        </div>
-
-        <div class="side-section">
-          <div class="sec-label" style="margin-bottom:0.55rem;">🎯 Pauze-activiteiten</div>
-          <div class="item-list" id="d-acts"><div class="empty-msg">Geen activiteiten.</div></div>
-          <div class="add-row" style="margin-bottom:0.5rem;">
-            <input type="text" class="inp" id="a-inp" placeholder="Nieuwe activiteit..." style="flex:1;margin:0;font-size:0.65rem;">
-            <button class="btn-sm" id="d-act-add">+</button>
-          </div>
-          <button class="btn-spin" id="d-spin">🎡 Draai het wiel!</button>
-        </div>
-      </div>
-
     </div>
-  </div>
 
-  <script type="module" src="./src/dashboard.js"></script>
+    <div id="page-dashboard" class="page active">
+        <div class="dash-grid">
+
+            <div class="dash-header">
+                <img src="assets/256_schild.png" class="dash-header-logo" alt="Logo">
+                <div class="dash-title-block">
+                    <div class="dash-title">Blokbar</div>
+                    <div class="dash-sub" id="d-welcome">Aanmelden...</div>
+                </div>
+                <div class="hdr-right">
+                    <button class="btn-link btn-mute" id="d-mute">🔊 Geluid</button>
+                    <a href="scherm.html" class="btn-link btn-screen">📺 Scherm →</a>
+                </div>
+            </div>
+
+            <div class="dash-main">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="sec-label">⏱ Studietimer</div>
+                        <button class="btn-action btn-go" id="d-study-btn">▶ Start</button>
+                    </div>
+                    <div class="study-row">
+                        <div class="dot" id="d-dot"></div>
+                        <div class="study-time" id="d-time">0:00:00</div>
+                        <div class="study-state" id="d-state">Niet bezig</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="sec-label">⏰ Mijn timers</div>
+                    </div>
+                    <div class="item-list" id="d-timers">
+                        <div class="empty-msg">Geen timers actief.</div>
+                    </div>
+                    <div class="add-row">
+                        <input type="text" class="inp" id="t-label" placeholder="Timer naam..."
+                            style="flex:1;margin:0;">
+                        <select class="inp-sm" id="t-min">
+                            <option value="5">5m</option>
+                            <option value="10">10m</option>
+                            <option value="15" selected>15m</option>
+                            <option value="20">20m</option>
+                            <option value="25">25m</option>
+                            <option value="30">30m</option>
+                            <option value="45">45m</option>
+                            <option value="60">60m</option>
+                            <option value="90">90m</option>
+                        </select>
+                        <button class="btn-sm" id="d-timer-add">+ Timer</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="sec-label">🎵 Achtergrond</div>
+                        <button class="btn-sm" id="d-skip">⏭ Volgende</button>
+                    </div>
+                    <div class="item-list" id="d-playlist">
+                        <div class="empty-msg">Geen video's. Voeg een YouTube of video URL toe.</div>
+                    </div>
+                    <div class="add-row" style="flex-wrap:wrap;gap:0.4rem;">
+                        <input type="text" class="inp" id="p-url"
+                            placeholder="YouTube / Internet Archive / video URL..." style="margin:0;flex:1 1 200px;">
+                        <input type="text" class="inp" id="p-title" placeholder="Naam..."
+                            style="margin:0;flex:0 0 120px;">
+                        <button class="btn-sm" id="d-playlist-add">+ Toevoegen</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dash-side">
+                <div class="side-section">
+                    <div class="sec-label" style="margin-bottom:0.55rem;">👥 Aanwezig</div>
+                    <div id="d-online">
+                        <div class="empty-msg">Laden...</div>
+                    </div>
+                </div>
+
+                <div class="side-section">
+                    <div class="sec-label" style="margin-bottom:0.55rem;">🎯 Pauze-activiteiten</div>
+                    <div class="item-list" id="d-acts">
+                        <div class="empty-msg">Geen activiteiten.</div>
+                    </div>
+                    <div class="add-row" style="margin-bottom:0.5rem;">
+                        <input type="text" class="inp" id="a-inp" placeholder="Nieuwe activiteit..."
+                            style="flex:1;margin:0;font-size:0.65rem;">
+                        <button class="btn-sm" id="d-act-add">+</button>
+                    </div>
+                    <button class="btn-spin" id="d-spin">🎡 Draai het wiel!</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script type="module" src="./src/dashboard.js"></script>
 </body>
+
 </html>

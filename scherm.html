@@ -1,56 +1,67 @@
 <!DOCTYPE html>
 <html lang="nl">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MAG Blokbar 📺 - Live Scherm</title>
-  <link rel="shortcut icon" href="assets/256_schild.png" type="image/x-icon">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;800&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MAG Blokbar 📺 - Live Scherm</title>
+    <link rel="shortcut icon" href="assets/256_schild.png" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;800&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link rel="stylesheet" href="css/shared.css">
+    <link rel="stylesheet" href="css/scherm.css">
 </head>
+
 <body>
 
-  <div id="bg-layer">
-    <video id="bg-video" autoplay muted loop playsinline></video>
-    <iframe id="bg-iframe" frameborder="0" allow="autoplay;encrypted-media" allowfullscreen style="display:none"></iframe>
-  </div>
-  <div id="bg-overlay"></div>
+    <div id="bg-layer">
+        <video id="bg-video" autoplay muted loop playsinline></video>
+        <iframe id="bg-iframe" frameborder="0" allow="autoplay;encrypted-media" allowfullscreen
+            style="display:none"></iframe>
+    </div>
+    <div id="bg-overlay"></div>
 
-  <div id="notifs"></div>
+    <div id="notifs"></div>
 
-  <div id="spin-overlay">
-    <canvas id="spin-canvas" width="440" height="440"></canvas>
-    <div id="spin-result"></div>
-    <button id="spin-close">Sluiten</button>
-  </div>
-
-  <div id="page-scherm" class="page active">
-    <div class="scherm-top">
-      <img src="assets/256_schild.png" class="scherm-logo" alt="Logo">
-      <img src="assets/blokbar.svg" class="scherm-blokbar" alt="MAG BLOKBAR">
-      <div class="scherm-hint">
-        Doe mee op: <strong><a id="domain_name" href="./" style="color: inherit; text-decoration: underline;">/</a></strong>
-      </div>
+    <div id="spin-overlay">
+        <canvas id="spin-canvas" width="440" height="440"></canvas>
+        <div id="spin-result"></div>
+        <button id="spin-close">Sluiten</button>
     </div>
 
-    <div class="scherm-center">
-      <div class="scherm-time" id="s-clock">--:--:--</div>
-      <div class="scherm-date-str" id="s-date"></div>
-      <div class="scherm-quote-wrap">
-        <div class="scherm-quote-text" id="s-quote">...</div>
-        <div class="scherm-quote-by" id="s-quote-by"></div>
-      </div>
+    <div id="page-scherm" class="page active">
+        <div class="scherm-top">
+            <img src="assets/256_schild.png" class="scherm-logo" alt="Logo">
+            <img src="assets/blokbar.svg" class="scherm-blokbar" alt="MAG BLOKBAR">
+            <div class="scherm-hint">
+                Doe mee op: <strong><a id="domain_name" href="./"
+                        style="color: inherit; text-decoration: underline;">/</a></strong>
+
+                <div id="qrcode" style="margin-top: 15px;"></div>
+            </div>
+        </div>
+
+        <div class="scherm-center">
+            <div class="scherm-time" id="s-clock">--:--:--</div>
+            <div class="scherm-date-str" id="s-date"></div>
+            <div class="scherm-quote-wrap">
+                <div class="scherm-quote-text" id="s-quote">...</div>
+                <div class="scherm-quote-by" id="s-quote-by"></div>
+            </div>
+        </div>
+
+        <div class="scherm-lb">
+            <div class="lb-label">🏆 Top studenten</div>
+            <div class="lb-top3" id="lb-top"></div>
+            <div class="lb-rest" id="lb-rest"></div>
+        </div>
     </div>
 
-    <div class="scherm-lb">
-      <div class="lb-label">🏆 Top studenten</div>
-      <div class="lb-top3" id="lb-top"></div>
-      <div class="lb-rest" id="lb-rest"></div>
-    </div>
-  </div>
-
-  <script type="module" src="./src/scherm.js"></script>
+    <script type="module" src="./src/scherm.js"></script>
 </body>
+
 </html>
