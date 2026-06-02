@@ -20,7 +20,11 @@ export const state = {
   
   studyActive: false,
   studyStart: null,
-  studyBase: parseInt(localStorage.getItem('blokbar_secs') || '0'),
+  
+  // Track separate bases for accurate dynamic additions
+  sessionBase: 0, 
+  totalBase: parseInt(localStorage.getItem('blokbar_secs') || '0'), 
+  
   isMuted: false,
   playlist: [],
   playIdx: 0,
@@ -33,7 +37,8 @@ export const state = {
 export function setMyName(name) { state.myName = name; }
 export function setStudyActive(val) { state.studyActive = val; }
 export function setStudyStart(val) { state.studyStart = val; }
-export function setStudyBase(val) { state.studyBase = val; }
+export function setSessionBase(val) { state.sessionBase = val; }
+export function setTotalBase(val) { state.totalBase = val; }
 export function setIsMuted(val) { state.isMuted = val; }
 export function setPlaylist(val) { state.playlist = val; }
 export function setPlayIdx(val) { state.playIdx = val; }

@@ -1,6 +1,6 @@
-import { state, setStudyActive, setStudyStart, setStudyBase } from '../shared/config.js';
+import { state, setStudyActive, setStudyStart, setSessionBase, setTotalBase } from '../shared/config.js';
 import { fmtSec } from '../shared/utils.js';
-import { upsertPresence, getStudySecs } from './identity.js';
+import { upsertPresence, getSessionSecs, getTotalSecs } from './identity.js';
 
 export function initStudyTimer() {
   const studyBtn = document.getElementById('d-study-btn');
@@ -8,30 +8,39 @@ export function initStudyTimer() {
   
   studyBtn.addEventListener('click', toggleStudy);
 
+  // Live active display loop
   setInterval(() => {
-    const s = getStudySecs();
     const el = document.getElementById('d-time');
-    if (el) el.textContent = fmtSec(s);
+    if (el) {
+      // Display current session time as the primary visual block count
+      el.textContent = fmtSec(getSessionSecs());
+    }
   }, 1000);
 }
 
 function toggleStudy() {
   if (state.studyActive) {
-    const currentSecs = getStudySecs();
-    setStudyBase(currentSecs);
-    localStorage.setItem('blokbar_secs', currentSecs);
+    // Collect accrued runtime variables
+    const completedSession = getSessionSecs();
+    const completedTotal = getTotalSecs();
+    
+    setSessionBase(completedSession);
+    setTotalBase(completedTotal);
+    localStorage.setItem('blokbar_secs', completedTotal);
+    
     setStudyActive(false); 
     setStudyStart(null);
     
     document.getElementById('d-study-btn').textContent = '▶ Start';
     document.getElementById('d-study-btn').className = 'btn-action btn-go';
     document.getElementById('d-dot').className = 'dot';
-    document.getElementById('d-state').textContent = 'Gestopt';
+    document.getElementById('d-state').textContent = 'Gepauzeerd';
   } else {
+    // Instantiate structural tracking epoch anchor
     setStudyStart(Date.now());
     setStudyActive(true);
     
-    document.getElementById('d-study-btn').textContent = '⏹ Stop';
+    document.getElementById('d-study-btn').textContent = '⏸ Pauze';
     document.getElementById('d-study-btn').className = 'btn-action btn-stop';
     document.getElementById('d-dot').className = 'dot on';
     document.getElementById('d-state').textContent = 'Aan het studeren';

@@ -232,6 +232,10 @@
 select.inp-sm {
 	cursor: pointer;
 }
+select.inp-sm option {
+  background-color: var(--deep); /* Forces a dark brown/black background for the dropdown menu */
+  color: var(--cream);           /* Ensures the text remains readable and cream-colored */
+}
 
 /* ============ DYNAMIC LIST CONSTRUCTS ============ */
 .item-list {
