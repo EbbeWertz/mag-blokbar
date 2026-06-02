@@ -85,28 +85,6 @@
 	margin-top: 0.5rem;
 }
 
-/* ============ GLOBAL SYSTEM ALERTS ============ */
-#mute-banner {
-	position: fixed;
-	left: 50%;
-	top: 0;
-	transform: translateX(-50%);
-	z-index: 300;
-	padding: 0.55rem 1.5rem;
-	background: rgba(15, 10, 7, 0.88);
-	border-bottom: 1px solid rgba(212, 160, 23, 0.4);
-	font-size: 0.62rem;
-	letter-spacing: 0.06em;
-	color: var(--amber);
-	backdrop-filter: blur(10px);
-	display: none;
-	text-align: center;
-	width: 100%;
-}
-#mute-banner.on {
-	display: block;
-}
-
 /* ============ LEADERBOARD COMPONENTS ============ */
 .scherm-lb {
 	flex-shrink: 0;

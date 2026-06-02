@@ -18,14 +18,12 @@ function tickClock() {
 		cl.textContent = now.toLocaleTimeString("nl-NL", {
 			hour: "2-digit",
 			minute: "2-digit",
-			second: "2-digit",
 		});
 	if (dt)
 		dt.textContent = now.toLocaleDateString("nl-NL", {
 			weekday: "long",
 			day: "numeric",
 			month: "long",
-			year: "numeric",
 		});
 }
 

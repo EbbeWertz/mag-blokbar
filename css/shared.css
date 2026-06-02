@@ -88,6 +88,30 @@ body::after {
 	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
+/* ============ GLOBAL SYSTEM ALERTS ============ */
+#mute-banner {
+	width: 100%;
+	padding: 0.55rem 1.5rem;
+	background: rgba(15, 10, 7, 0.88);
+	border-bottom: 1px solid rgba(212, 160, 23, 0.4);
+	font-size: 0.62rem;
+	letter-spacing: 0.06em;
+	color: var(--amber);
+	backdrop-filter: blur(10px);
+	text-align: center;
+
+	/* Natural document flow so it acts as page content */
+	display: none;
+	position: relative;
+	z-index: 300;
+	box-sizing: border-box;
+}
+
+/* When active, it displays as a block element at the top */
+#mute-banner.on {
+	display: block;
+}
+
 /* ============ NOTIFICATIONS ============ */
 #notifs {
 	position: fixed;
