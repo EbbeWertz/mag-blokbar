@@ -81,7 +81,7 @@ export function doSpin() {
       ctx.fill();
       ctx.strokeStyle = '#0f0a07'; ctx.lineWidth = 2; ctx.stroke();
       ctx.save();
-      ctx.translate(cx, cy);
+      ctx.translate(cx, cy); 
       ctx.rotate(a + i * arc + arc / 2);
       ctx.fillStyle = '#f4eed9';
       ctx.font = 'bold 12px Space Mono';
