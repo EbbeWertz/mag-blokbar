@@ -28,15 +28,17 @@ export async function loadPlaylist() {
   
   const idxRow = dbState.find(s => s.key === 'play_idx');
   let dbIdx = idxRow ? parseInt(idxRow.value) : 0;
+  
+  // Corrigeer de index als er video's zijn verwijderd en de opgeslagen index buiten de lijst valt
   if (items.length > 0 && dbIdx >= items.length) {
-    dbIdx = items.length - 1;
+    dbIdx = 0; // Reset naar het begin in plaats van de laatste te pakken
     await dbUpsert('blokbar_state', { key: 'play_idx', value: String(dbIdx) });
   } else if (items.length === 0) {
     dbIdx = 0;
   }
   setPlayIdx(dbIdx);  
   
-  // Pull live state time from DB to display on load
+  // Haal live timestamps op voor weergave
   const curRow = dbState.find(s => s.key === 'yt_current_time');
   const durRow = dbState.find(s => s.key === 'yt_total_duration');
   const curTime = curRow ? parseFloat(curRow.value) : 0;
@@ -58,18 +60,25 @@ async function addPlaylist() {
   loadPlaylist();
 }
 
+// CRUCIALE FIX: Sla de video niet meer over door hem te verwijderen, 
+// maar verhoog de play_idx tabelwaarde (en herhaal bij het einde)
 export async function skipPlaylist() {
   if (!state.playlist.length) return;
-  const currentVideo = state.playlist[state.playIdx];
 
-  if (currentVideo && currentVideo.id) {
-    await Promise.all([
-      dbUpsert('blokbar_state', { key: 'yt_current_time', value: '0' }),
-      dbUpsert('blokbar_state', { key: 'yt_total_duration', value: '0' })
-    ]);
-    await dbDel('blokbar_playlist', currentVideo.id);
-    await loadPlaylist();
-  }
+  // Reset de live tijsteller in de database voor de volgende video
+  await Promise.all([
+    dbUpsert('blokbar_state', { key: 'yt_current_time', value: '0' }),
+    dbUpsert('blokbar_state', { key: 'yt_total_duration', value: '0' })
+  ]);
+
+  // Bereken de volgende index (keert terug naar 0 als het einde is bereikt)
+  const nextIdx = (state.playIdx + 1) % state.playlist.length;
+  
+  // Sla de nieuwe index op in de centrale database status tabel
+  await dbUpsert('blokbar_state', { key: 'play_idx', value: String(nextIdx) });
+  
+  // Herlaad de playlist lokaal om de wijziging direct door te voeren
+  await loadPlaylist();
 }
 
 function formatTime(seconds) {
@@ -119,14 +128,14 @@ export function setVideo() {
   }
 
   const item = state.playlist[state.playIdx % state.playlist.length];
-  if (!ifr) return; // Safeguard if running inside Dashboard.js layout context
+  if (!ifr) return; // Beveiliging voor als dit binnen de Dashboard layout context draait
 
   const ytMatch = item.url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([a-zA-Z0-9_-]{11})/);
   if (ytMatch) {
     const id = ytMatch[1];
     ifr.style.display = 'block';
 
-    // If player doesn't exist yet, initialize it once
+    // Als de speler nog niet bestaat, initialiseer hem eenmalig
     if (!playerInstance) {
       currentVideoId = id;
       playerInstance = new YT.Player('bg-iframe', {
@@ -138,7 +147,7 @@ export function setVideo() {
           'disablekb': 1,
           'modestbranding': 1,
           'iv_load_policy': 3,
-          'loop': 1,
+          'loop': 0, // Uitgezet zodat de onStateChange ENDED handler betrouwbaar triggert voor de wachtrij
           'playlist': id
         },
         events: {
@@ -148,6 +157,7 @@ export function setVideo() {
             startStateBroadcaster();
           },
           'onStateChange': async (event) => {
+            // AUTOMATISCHE DOORLOOP TRIGER: Spring naar de volgende video zodra deze is afgelopen
             if (event.data === YT.PlayerState.ENDED) {
               await skipPlaylist();
             }
@@ -155,7 +165,7 @@ export function setVideo() {
         }
       });
     } else if (currentVideoId !== id) {
-      // If player already exists, change video using API commands directly to secure autoplay
+      // Als de player al bestaat, laad de nieuwe ID in via de API om autoplay te forceren
       currentVideoId = id;
       if (typeof playerInstance.loadVideoById === 'function') {
         playerInstance.loadVideoById({
@@ -183,7 +193,7 @@ function startStateBroadcaster() {
         const current = playerInstance.getCurrentTime();
         const duration = playerInstance.getDuration();
         if (duration > 0) {
-          // Send live data across the database state table to any active dashboards
+          // Zend live voortgang naar de database
           await Promise.all([
             dbUpsert('blokbar_state', { key: 'yt_current_time', value: String(current) }),
             dbUpsert('blokbar_state', { key: 'yt_total_duration', value: String(duration) })

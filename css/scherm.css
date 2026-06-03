@@ -345,3 +345,35 @@
     background-color: transparent !important;
     pointer-events: none;
 }
+
+/* ============ MINIMAL UPDATE: YOUTUBE IFRAME ZOOM & HELDERHEID ============ */
+
+/* Forceer de video-container om alle uitstekende (ingezoomde) delen te verbergen */
+#bg-layer {
+    overflow: hidden !important;
+}
+
+/* Bereken de perfecte 16:9 verhouding om de iframe groter te maken dan het scherm */
+#bg-layer iframe,
+#bg-iframe {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    width: 100vw !important;
+    height: 56.25vw !important; /* 100 * 9 / 16 */
+    min-height: 100vh !important;
+    min-width: 177.77vh !important; /* 100 * 16 / 9 */
+    transform: translate(-50%, -50%) !important; /* Centreer de zoom */
+    object-fit: fill !important; /* Overschrijf de niet-werkende cover status */
+}
+
+/* Zorg dat de video op volle helderheid (100% zichtbaar) instelt zodra hij klaar is */
+#bg-layer.ready iframe,
+#bg-layer.ready #bg-iframe {
+    opacity: 1 !important;
+}
+
+/* Schakel de donkere verloop-overlay volledig uit */
+#bg-overlay {
+    display: none !important;
+}
