@@ -69,12 +69,19 @@
                     <div class="card-header">
                         <div class="sec-label">⏰ Mijn timers</div>
                     </div>
+
                     <div class="item-list" id="d-timers">
                         <div class="empty-msg">Geen timers actief.</div>
                     </div>
+
+                    <div class="timer-config-row">
+                        <button id="btn-toggle-autoplay" class="btn-sm toggle-btn active">Autoplay: AAN</button>
+                        <button id="btn-toggle-expire" class="btn-sm toggle-btn">Timer verwijderen & volgende</button>
+                    </div>
+
                     <div class="add-row">
                         <input type="text" class="inp" id="t-label" placeholder="Timer naam..."
-                            style="flex:1;margin:0;">
+                            style="flex:1; margin:0;">
                         <select class="inp-sm" id="t-min">
                             <option value="5">5m</option>
                             <option value="10">10m</option>

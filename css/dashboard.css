@@ -430,3 +430,76 @@ select.inp-sm option {
 		border-top: 1px solid var(--glass-border);
 	}
 }
+
+/* ============ TIMER CONFIGURATION ROW ============ */
+.timer-config-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.25rem;
+}
+
+/* Aan- en uit-status voor de toggle buttons */
+.btn-sm.toggle-btn {
+    font-size: 0.58rem;
+    padding: 0.25rem 0.6rem;
+    background: rgba(244, 238, 217, 0.02);
+    border-color: rgba(244, 238, 217, 0.1);
+    color: var(--dust);
+}
+
+.btn-sm.toggle-btn.active {
+    background: rgba(76, 186, 125, 0.12);
+    border-color: rgba(76, 186, 125, 0.35);
+    color: var(--green);
+}
+
+.btn-sm.toggle-btn.off {
+    background: rgba(225, 39, 42, 0.08);
+    border-color: rgba(225, 39, 42, 0.25);
+    color: var(--red);
+}
+
+/* ============ DYNAMIC TIMER ROW STATES ============ */
+/* Als de timer actief is (aan het spelen is) */
+.item-row.is-playing {
+    border-color: rgba(76, 186, 125, 0.35);
+    background: rgba(76, 186, 125, 0.04);
+}
+
+.item-row.is-playing .item-label {
+    color: var(--cream);
+    font-weight: 700;
+}
+
+.item-row.is-playing .item-meta {
+    color: var(--green);
+}
+
+/* Als de timer inactief is (wachtend in de queue / idle) */
+.item-row.is-idle {
+    border-color: rgba(244, 238, 217, 0.08);
+    background: rgba(244, 238, 217, 0.02);
+    opacity: 0.75;
+}
+
+.item-row.is-idle .item-label {
+    color: var(--dust);
+}
+
+.item-row.is-idle .timer-left.idle {
+    color: var(--dust);
+}
+
+/* Acties binnen de timer-regel (Start/Pauze & Verwijder knoppen) */
+.timer-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-shrink: 0;
+}
+
+.timer-actions .btn-sm {
+    padding: 0.2rem 0.5rem;
+    font-size: 0.58rem;
+}

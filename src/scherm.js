@@ -45,13 +45,16 @@ async function loadTimers() {
     const data = await dbGet('blokbar_timers');
     const now = Date.now();
     
-    const expired = data.filter(t => new Date(t.ends_at).getTime() < now);
+    // CRUCIALE FIX: Verwijder de timer ALLEEN als deze daadwerkelijk actief (is_playing) was én verlopen is
+    const expired = data.filter(t => t.is_playing && new Date(t.ends_at).getTime() < now);
     for (const t of expired) {
         notify(`✅ Timer klaar: "${t.label}" (${t.owner_name})`, 'timer');
         await dbDel('blokbar_timers', t.id);
     }
     
-    setTimers(data.filter(t => new Date(t.ends_at).getTime() >= now));
+    // Bewaar alle timers die nog niet verlopen zijn ÓF die momenteel gepauzeerd/inactief in de wachtrij staan
+    const validTimers = data.filter(t => !t.is_playing || new Date(t.ends_at).getTime() >= now);
+    setTimers(validTimers);
     renderTimers();
 }
 
@@ -64,26 +67,29 @@ function renderTimers() {
     }
     
     el.innerHTML = state.timers.map(t => {
-        const remMs = new Date(t.ends_at).getTime() - Date.now();
-        const totalSecs = Math.max(0, Math.round(remMs / 1000));
+        let totalSecs = t.remaining_seconds;
+
+        if (t.is_playing) {
+            const remMs = new Date(t.ends_at).getTime() - Date.now();
+            totalSecs = Math.max(0, Math.round(remMs / 1000));
+        }
         
         const mins = Math.floor(totalSecs / 60);
         const secs = totalSecs % 60;
         
         const strMins = String(mins).padStart(2, '0');
         const strSecs = String(secs).padStart(2, '0');
-        const urgent = totalSecs < 60;
+        const urgent = t.is_playing && totalSecs < 60;
 
-        // Geen losse helften meer, gewoon één element dat we via CSS animeren zodra de content verandert.
         return `
-            <div class="s-timer-item ${urgent ? 'urgent' : ''}">
+            <div class="s-timer-item ${urgent ? 'urgent' : ''} ${!t.is_playing ? 's-paused' : ''}">
                 <div class="s-flip-container">
                     <div class="s-flip-card" key="${strMins}">${strMins}</div>
                     <span class="s-flip-separator">:</span>
                     <div class="s-flip-card" key="${strSecs}">${strSecs}</div>
                 </div>
                 <div class="s-timer-details">
-                    <div class="s-timer-label">${t.label}</div>
+                    <div class="s-timer-label">${t.label} ${!t.is_playing ? '(Wachtrij)' : ''}</div>
                     <div class="s-timer-owner">${t.owner_name}</div>
                 </div>
             </div>`;
