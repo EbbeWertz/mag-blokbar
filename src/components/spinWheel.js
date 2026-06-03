@@ -5,16 +5,10 @@ export function initSpinWheel() {
   const actAddBtn = document.getElementById('d-act-add');
   const actInp = document.getElementById('a-inp');
   const spinBtn = document.getElementById('d-spin');
-  const closeBtn = document.getElementById('spin-close');
 
   if (actAddBtn) actAddBtn.addEventListener('click', addAct);
   if (actInp) actInp.addEventListener('keydown', e => e.key === 'Enter' && addAct());
   if (spinBtn) spinBtn.addEventListener('click', launchSpin);
-  if (closeBtn) closeBtn.addEventListener('click', async () => {
-    const overlay = document.getElementById('spin-overlay');
-    if (overlay) overlay.classList.remove('on');
-    await dbUpsert('blokbar_state', { key: 'spinning', value: '0' });
-  });
 
   window.delAct = async (id) => { 
     await dbDel('blokbar_activities', id); 
@@ -106,6 +100,13 @@ export function doSpin() {
     const finalNorm = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
     const winner = Math.floor(((Math.PI * 2 - finalNorm) % (Math.PI * 2)) / arc) % n;
     document.getElementById('spin-result').textContent = '🎯 ' + labels[winner];
+
+    // --- AUTOMATIC CLOSE TRIGGER ---
+    // Wait for 5 seconds after the wheel has landed, then dismiss automatically
+    setTimeout(async () => {
+      overlay.classList.remove('on');
+      await dbUpsert('blokbar_state', { key: 'spinning', value: '0' });
+    }, 5000);
   }
   requestAnimationFrame(frame);
 }
