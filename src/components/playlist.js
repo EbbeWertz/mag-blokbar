@@ -23,8 +23,14 @@ export async function loadPlaylist() {
   setPlaylist(items);
   
   const idxRow = dbState.find(s => s.key === 'play_idx');
-  setPlayIdx(idxRow ? (parseInt(idxRow.value) % Math.max(1, state.playlist.length)) : 0);
-  
+  let dbIdx = idxRow ? parseInt(idxRow.value) : 0;
+  if (items.length > 0 && dbIdx >= items.length) {
+    dbIdx = items.length - 1;
+    await dbUpsert('blokbar_state', { key: 'play_idx', value: String(dbIdx) });
+  } else if (items.length === 0) {
+    dbIdx = 0;
+  }
+  setPlayIdx(dbIdx);  
   renderPlaylist();
   setVideo();
 }
@@ -41,23 +47,36 @@ async function addPlaylist() {
   loadPlaylist();
 }
 
-async function skipPlaylist() {
-  const newIdx = (state.playIdx + 1) % Math.max(1, state.playlist.length);
-  await dbUpsert('blokbar_state', { key: 'play_idx', value: String(newIdx) });
-  notify(`⏭ ${state.myName} heeft overgeslagen naar het volgende`, 'music');
+export async function skipPlaylist() {
+  // If there is nothing to skip, exit
+  if (!state.playlist.length) return;
+
+  // Find the video item currently playing
+  const currentVideo = state.playlist[state.playIdx];
+
+  if (currentVideo && currentVideo.id) {
+    // Instead of changing play_idx pointer, DELETE the current active video
+    await dbDel('blokbar_playlist', currentVideo.id);
+    
+    // Explicitly update the local client state directly for snappy feedback
+    await loadPlaylist();
+  }
 }
 
-function renderPlaylist() {
+export function renderPlaylist() {
   const el = document.getElementById('d-playlist');
   if (!el) return;
-  if (!state.playlist.length) { el.innerHTML = '<div class="empty-msg">Geen video\'s. Voeg een URL toe hieronder.</div>'; return; }
+  if (!state.playlist.length) { 
+    el.innerHTML = '<div class="empty-msg">Geen video\'s. Voeg een URL toe hieronder.</div>'; 
+    return; 
+  }
   
   el.innerHTML = state.playlist.map((item, i) => `
     <div class="item-row${i === state.playIdx ? ' playing' : ''}">
       ${i === state.playIdx ? '<div class="playing-pip"></div>' : ''}
       <div class="item-label">${item.title || item.url}</div>
       <div class="item-meta">${item.added_by || ''}</div>
-      <button class="btn-sm del" onclick="delPlaylist('${item.id}')">✕</button>
+      <button class="btn-sm del" onclick="window.delPlaylist('${item.id}')">✕</button>
     </div>`).join('');
 }
 
@@ -67,6 +86,14 @@ export function setVideo() {
   const vid = document.getElementById('bg-video');
   const ifr = document.getElementById('bg-iframe');
   const layer = document.getElementById('bg-layer');
+
+  if (!state.playlist.length) {
+    if (ifr) { ifr.src = ''; ifr.style.display = 'none'; }
+    if (vid) { vid.src = ''; vid.style.display = 'none'; try { vid.pause(); } catch(e){} }
+    if (layer) layer.classList.remove('ready');
+    return;
+  }
+
   if (!vid || !ifr) return; // Fail-safes cleanly on Dashboard page
 
   const ytMatch = item.url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([a-zA-Z0-9_-]{11})/);

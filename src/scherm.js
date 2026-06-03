@@ -41,7 +41,7 @@ async function fetchQuote() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-    const domain = window.location.href;
+	const domain = window.location.href;
 	document.getElementById("domain_name").innerText = domain;
 	// new QRCode(document.getElementById("qrcode"), {
 	// 	text: domain,
@@ -119,12 +119,15 @@ window.addEventListener("DOMContentLoaded", () => {
 				);
 		});
 
-		sub("blokbar_playlist", payload => {
-			if (payload.eventType === "INSERT")
+		sub("blokbar_playlist", async (payload) => {
+			await loadPlaylist();
+
+			if (payload.eventType === "INSERT") {
 				notify(
 					`🎵 "${payload.new.title}" toegevoegd door ${payload.new.added_by}`,
 					"music",
 				);
+			}
 		});
 	}
 });
