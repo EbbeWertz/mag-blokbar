@@ -341,8 +341,8 @@
 }
 
 #bg-overlay {
-    background: transparent !important;
-    background-color: transparent !important;
+    /* background: transparent !important; */
+    /* background-color: transparent !important; */
     pointer-events: none;
 }
 
@@ -371,9 +371,4 @@
 #bg-layer.ready iframe,
 #bg-layer.ready #bg-iframe {
     opacity: 1 !important;
-}
-
-/* Schakel de donkere verloop-overlay volledig uit */
-#bg-overlay {
-    display: none !important;
 }
