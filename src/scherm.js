@@ -108,7 +108,7 @@ function renderTimers() {
 }
 
 function initApp() {
-    const domain = window.location.href;
+    const domain = window.location.href.replace('/scherm.html', '');
     const domainEl = document.getElementById("domain_name");
     if (domainEl) domainEl.innerText = domain;
 
