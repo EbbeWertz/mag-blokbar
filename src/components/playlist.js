@@ -227,7 +227,7 @@ function startStateBroadcaster() {
         console.debug("Broadcaster paused");
       }
     }
-  }, 5000);
+  }, 1000);
 }
 
 async function toggleMute() {

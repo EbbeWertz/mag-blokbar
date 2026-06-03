@@ -29,26 +29,16 @@ function tickClock() {
 }
 
 async function fetchQuote() {
-    try {
-        // Gebruik de /api/random/ query param of voeg een proxy toe. 
-        // ZenQuotes vereist vaak de overstap naar hun openbare spiegel of CORS parameter:
-        const r = await fetch("https://corsproxy.io/?https://zenquotes.io/api/random");
-        const data = await r.json();
-        
-        // ZenQuotes geeft altijd een ARRAY terug met 1 object: [{ q: "...", a: "..." }]
-        if (data && data.length > 0) {
-            const d = data[0];
-            const q = document.getElementById("s-quote");
-            const a = document.getElementById("s-quote-by");
-            
-            if (q) q.textContent = `"${d.q}"`;  // 'q' staat voor de quote text
-            if (a) a.textContent = `— ${d.a}`;  // 'a' staat voor de auteur
-        }
-    } catch (e) {
-        console.error("Quote fetch error: ", e);
-        // Fallback naar dummyjson als ZenQuotes onverhoopt faalt (bijv. rate limits)
-        fetchDummyJsonQuote(); 
-    }
+  try {
+    const r = await fetch('https://dummyjson.com/quotes/random');
+    const d = await r.json();
+    const q = document.getElementById('s-quote');
+    const a = document.getElementById('s-quote-by');
+    if (q) q.textContent = `"${d.quote}"`;
+    if (a) a.textContent = `— ${d.author}`;
+  } catch(e) {
+    console.error("Quote fetch error: ", e);
+  }
 }
 
 async function loadTimers() {
