@@ -152,12 +152,16 @@ export function setVideo() {
         },
         events: {
           'onReady': (event) => {
+            // PERFORMANCE FIX: Forceer YouTube naar 1080p om zware, laggende 4K-upscaling te voorkomen
+            if (typeof event.target.setPlaybackQuality === 'function') {
+              event.target.setPlaybackQuality('large');
+            }
             event.target.playVideo();
             if (layer) layer.classList.add('ready');
             startStateBroadcaster();
           },
           'onStateChange': async (event) => {
-            // AUTOMATISCHE DOORLOOP TRIGER: Spring naar de volgende video zodra deze is afgelopen
+            // AUTOMATISCHE DOORLOOP TRIGGER: Spring naar de volgende video zodra deze is afgelopen
             if (event.data === YT.PlayerState.ENDED) {
               await skipPlaylist();
             }
@@ -168,9 +172,11 @@ export function setVideo() {
       // Als de player al bestaat, laad de nieuwe ID in via de API om autoplay te forceren
       currentVideoId = id;
       if (typeof playerInstance.loadVideoById === 'function') {
+        // PERFORMANCE FIX: Forceer de resolutie ook bij het wisselen van nummers
         playerInstance.loadVideoById({
           videoId: id,
-          startSeconds: 0
+          startSeconds: 0,
+          suggestedQuality: 'large'
         });
         if (layer) layer.classList.add('ready');
         startStateBroadcaster();
@@ -203,7 +209,7 @@ function startStateBroadcaster() {
         console.debug("Broadcaster paused");
       }
     }
-  }, 1000);
+  }, 5000);
 }
 
 async function toggleMute() {
