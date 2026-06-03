@@ -49,8 +49,27 @@ export async function loadPlaylist() {
 }
 
 async function addPlaylist() {
-  const url = document.getElementById('p-url').value.trim();
+  let url = document.getElementById('p-url').value.trim();
   if (!url) return;
+
+  // Schoon de URL op: verwijder alle extra query parameters zoals ?si= of &feature=
+  // Dit zorgt voor schonere data in je database
+  try {
+    const urlObj = new URL(url);
+    if (urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be')) {
+      const videoId = urlObj.hostname.includes('youtu.be') 
+        ? urlObj.pathname.substring(1) 
+        : urlObj.searchParams.get('v');
+        
+      if (videoId) {
+        // Herschrijf de link intern naar een schone standaardformaat
+        url = `https://www.youtube.com/watch?v=${videoId}`;
+      }
+    }
+  } catch (e) {
+    console.error("Ongeldige URL meegegeven");
+  }
+
   const title = document.getElementById('p-title').value.trim() || url.replace(/^https?:\/\//, '').split('/')[0].replace('www.', '');
   
   await dbUpsert('blokbar_playlist', { id: crypto.randomUUID(), url, title, added_by: state.myName, sort_order: Date.now() });
@@ -128,17 +147,18 @@ export function setVideo() {
   }
 
   const item = state.playlist[state.playIdx % state.playlist.length];
-  if (!ifr) return; // Beveiliging voor als dit binnen de Dashboard layout context draait
+  if (!ifr) return; 
 
   const ytMatch = item.url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([a-zA-Z0-9_-]{11})/);
   if (ytMatch) {
     const id = ytMatch[1];
     ifr.style.display = 'block';
 
-    // Als de speler nog niet bestaat, initialiseer hem eenmalig
     if (!playerInstance) {
       currentVideoId = id;
       playerInstance = new YT.Player('bg-iframe', {
+        // AUTOREWRITE: Forceert het gebruik van het lichtere, advertentie-arme domein
+        host: 'https://www.youtube-nocookie.com', 
         videoId: id,
         playerVars: {
           'autoplay': 1,
@@ -146,13 +166,14 @@ export function setVideo() {
           'controls': 0,
           'disablekb': 1,
           'modestbranding': 1,
-          'iv_load_policy': 3,
-          'loop': 0, // Uitgezet zodat de onStateChange ENDED handler betrouwbaar triggert voor de wachtrij
+          'iv_load_policy': 3, // Schakelt pop-ups en annotaties uit (scheelt CPU-kracht)
+          'rel': 0,            // Aanbevolen video's aan het einde komen alleen van hetzelfde kanaal
+          'loop': 0, 
           'playlist': id
         },
         events: {
           'onReady': (event) => {
-            // PERFORMANCE FIX: Forceer YouTube naar 1080p om zware, laggende 4K-upscaling te voorkomen
+            // Forceert de kwaliteit naar 480p ('large') om haperingen te voorkomen
             if (typeof event.target.setPlaybackQuality === 'function') {
               event.target.setPlaybackQuality('large');
             }
@@ -161,7 +182,6 @@ export function setVideo() {
             startStateBroadcaster();
           },
           'onStateChange': async (event) => {
-            // AUTOMATISCHE DOORLOOP TRIGGER: Spring naar de volgende video zodra deze is afgelopen
             if (event.data === YT.PlayerState.ENDED) {
               await skipPlaylist();
             }
@@ -169,14 +189,12 @@ export function setVideo() {
         }
       });
     } else if (currentVideoId !== id) {
-      // Als de player al bestaat, laad de nieuwe ID in via de API om autoplay te forceren
       currentVideoId = id;
       if (typeof playerInstance.loadVideoById === 'function') {
-        // PERFORMANCE FIX: Forceer de resolutie ook bij het wisselen van nummers
         playerInstance.loadVideoById({
           videoId: id,
           startSeconds: 0,
-          suggestedQuality: 'large'
+          suggestedQuality: 'large' // Garandeert 480p bij het wisselen van video's
         });
         if (layer) layer.classList.add('ready');
         startStateBroadcaster();
