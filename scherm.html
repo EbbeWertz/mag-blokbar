@@ -36,23 +36,32 @@
     <div id="page-scherm" class="page active">
 
         <div id="mute-banner">🔇 Stilte gevraagd — respecteer de mute. Vraag eerst vriendelijk als je het geluid wil aanzetten.</div>
+        
+        <!-- HEADER ELEMENTEN -->
         <div class="scherm-top">
-            <img src="assets/256_schild.png" class="scherm-logo" alt="Logo">
-            <img src="assets/blokbar.svg" class="scherm-blokbar" alt="MAG BLOKBAR">
+            <div class="header-branding">
+                <img src="assets/256_schild.png" class="scherm-logo" alt="Logo">
+                <img src="assets/blokbar.svg" class="scherm-blokbar" alt="MAG BLOKBAR">
+            </div>
             <div class="scherm-hint">
                 Doe mee op: <strong><a id="domain_name" href="./" style="color: inherit; text-decoration: underline;">/</a></strong>
-
                 <div id="qrcode" style="margin-top: 15px;"></div>
             </div>
         </div>
 
-        <div class="scherm-center">
-            <div class="scherm-time" id="s-clock">--:--:--</div>
-            <div class="scherm-date-str" id="s-date"></div>
-            <div class="scherm-quote-wrap">
-                <div class="scherm-quote-text" id="s-quote">...</div>
-                <div class="scherm-quote-by" id="s-quote-by"></div>
+        <!-- MIDDEN VERDEEL LAYOUT -->
+        <div class="scherm-middle-layout">
+            <div class="scherm-center">
+                <div class="scherm-time" id="s-clock">--:--:--</div>
+                <div class="scherm-date-str" id="s-date"></div>
+                <div class="scherm-quote-wrap">
+                    <div class="scherm-quote-text" id="s-quote">...</div>
+                    <div class="scherm-quote-by" id="s-quote-by"></div>
+                </div>
             </div>
+
+            <!-- ROBUUSTE FLIPCARD SIDEBAR -->
+            <div id="s-timers" class="scherm-timers-sidebar"></div>
         </div>
 
         <div class="scherm-lb">

@@ -1,5 +1,5 @@
-import { db, state, setPlayIdx, setIsMuted } from "./shared/config.js";
-import { dbGet, sub } from "./shared/db.js";
+import { db, state, setPlayIdx, setIsMuted, setTimers } from "./shared/config.js";
+import { dbGet, dbDel, sub } from "./shared/db.js";
 import { notify } from "./shared/utils.js";
 import { initIdentity, loadUsers } from "./components/identity.js";
 import {
@@ -41,6 +41,55 @@ async function fetchQuote() {
     }
 }
 
+async function loadTimers() {
+    const data = await dbGet('blokbar_timers');
+    const now = Date.now();
+    
+    const expired = data.filter(t => new Date(t.ends_at).getTime() < now);
+    for (const t of expired) {
+        notify(`✅ Timer klaar: "${t.label}" (${t.owner_name})`, 'timer');
+        await dbDel('blokbar_timers', t.id);
+    }
+    
+    setTimers(data.filter(t => new Date(t.ends_at).getTime() >= now));
+    renderTimers();
+}
+
+function renderTimers() {
+    const el = document.getElementById('s-timers');
+    if (!el) return;
+    if (!state.timers || !state.timers.length) { 
+        el.innerHTML = ''; 
+        return; 
+    }
+    
+    el.innerHTML = state.timers.map(t => {
+        const remMs = new Date(t.ends_at).getTime() - Date.now();
+        const totalSecs = Math.max(0, Math.round(remMs / 1000));
+        
+        const mins = Math.floor(totalSecs / 60);
+        const secs = totalSecs % 60;
+        
+        const strMins = String(mins).padStart(2, '0');
+        const strSecs = String(secs).padStart(2, '0');
+        const urgent = totalSecs < 60;
+
+        // Geen losse helften meer, gewoon één element dat we via CSS animeren zodra de content verandert.
+        return `
+            <div class="s-timer-item ${urgent ? 'urgent' : ''}">
+                <div class="s-flip-container">
+                    <div class="s-flip-card" key="${strMins}">${strMins}</div>
+                    <span class="s-flip-separator">:</span>
+                    <div class="s-flip-card" key="${strSecs}">${strSecs}</div>
+                </div>
+                <div class="s-timer-details">
+                    <div class="s-timer-label">${t.label}</div>
+                    <div class="s-timer-owner">${t.owner_name}</div>
+                </div>
+            </div>`;
+    }).join('');
+}
+
 function initApp() {
     const domain = window.location.href;
     const domainEl = document.getElementById("domain_name");
@@ -57,9 +106,12 @@ function initApp() {
     loadPlaylist();
     syncMute();
     loadActs();
+    loadTimers();
 
     setInterval(loadUsers, 12000);
     setInterval(syncMute, 15000);
+    setInterval(loadTimers, 10000);
+    setInterval(renderTimers, 1000);
 
     if (db) {
         sub("blokbar_state", async () => {
@@ -108,12 +160,14 @@ function initApp() {
             }
         });
 
-        sub("blokbar_timers", payload => {
-            if (payload.eventType === "INSERT")
+        sub("blokbar_timers", async (payload) => {
+            if (payload.eventType === "INSERT") {
                 notify(
                     `⏰ Timer ingesteld: "${payload.new.label}" door ${payload.new.owner_name}`,
                     "timer",
                 );
+            }
+            await loadTimers();
         });
 
         sub("blokbar_playlist", async (payload) => {

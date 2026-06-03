@@ -13,11 +13,17 @@
 /* ============ TOP NAV HEADER ============ */
 .scherm-top {
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
+	justify-content: space-between;
 	padding: 1.5rem 2rem 0.5rem;
 	gap: 1.5rem;
 	flex-shrink: 0;
 	z-index: 10;
+}
+.header-branding {
+	display: flex;
+	align-items: center;
+	gap: 1.5rem;
 }
 .scherm-logo {
 	height: 70px;
@@ -28,13 +34,23 @@
 	height: 50px;
 }
 .scherm-hint {
-	margin-left: auto;
-	font-size: 1rem;
+	font-size: 0.8rem;
 	background-color: rgba(0, 0, 0, 0.35);
 	border-radius: 0.5rem;
-	padding-top: 0.7rem;
-	padding-inline: 0.5rem;
+	padding: 0.5rem 0.7rem;
 	text-align: right;
+	width: 290px;
+	box-sizing: border-box;
+}
+
+/* ============ MIDDEN VERDEEL LAYOUT ============ */
+.scherm-middle-layout {
+	flex: 1;
+	display: flex;
+	align-items: center; /* Perfecte verticale uitlijning */
+	padding-inline: 2rem;
+	gap: 2rem;
+	z-index: 5;
 }
 
 /* ============ CENTER CLOCK & QUOTES ============ */
@@ -44,12 +60,11 @@
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	z-index: 5;
 	padding: 1rem;
 }
 .scherm-time {
 	font-family: "Fraunces", serif;
-	font-size: clamp(5rem, 15vw, 13rem);
+	font-size: clamp(5rem, 11vw, 12rem);
 	font-weight: 300;
 	line-height: 1;
 	color: var(--cream);
@@ -87,8 +102,134 @@
 	margin-top: 0.5rem;
 }
 
+/* ============ ROBUUSTE FLIPCARD CLOCK SIDEBAR ============ */
+.scherm-timers-sidebar {
+	display: flex;
+	flex-direction: column;
+	gap: 0.65rem;
+	width: 290px; /* Sluit naadloos aan bij de hint */
+	flex-shrink: 0;
+}
+.s-timer-item {
+	display: flex;
+	align-items: center;
+	gap: 0.8rem;
+	background: rgba(20, 15, 12, 0.7);
+	border: 1px solid rgba(255, 237, 216, 0.12);
+	backdrop-filter: blur(10px);
+	padding: 0.55rem 0.85rem;
+	border-radius: 8px;
+	width: 100%;
+	box-sizing: border-box;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.s-flip-container {
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+	flex-shrink: 0;
+	perspective: 200px; /* Cruciaal voor het 3D-kantel-effect */
+}
+.s-flip-separator {
+	font-family: "Space Mono", monospace;
+	font-size: 1.3rem;
+	font-weight: 700;
+	color: var(--dust);
+	padding-bottom: 2px;
+	animation: s-pulse 1s infinite;
+}
+
+/* De vernieuwde solide flipcard */
+.s-flip-card {
+	position: relative;
+	width: 44px;
+	height: 42px;
+	/* Split-shading verlichting direct over de tekst heengelegd */
+	background: linear-gradient(to bottom, #1d1713 0%, #15100d 48%, #0f0b09 52%, #0c0907 100%);
+	border-radius: 5px;
+	box-shadow: 0 3px 6px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+	
+	font-family: "Space Mono", monospace;
+	font-size: 1.35rem;
+	font-weight: 700;
+	color: #ffffff;
+	
+	/* Perfecte centering van de volledige tekst */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	letter-spacing: -0.02em;
+	
+	overflow: hidden;
+	backface-visibility: hidden;
+	transform-origin: center center;
+	animation: s-flip-down 0.25s cubic-bezier(0.2, 0.8, 0.3, 1) cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* De fysieke mechanische vouwlijn in het midden */
+.s-flip-card::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 50%;
+	width: 100%;
+	height: 0.5px;
+	background: rgba(0, 0, 0, 0.65);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+	z-index: 2;
+}
+
+/* Details */
+.s-timer-details {
+	display: flex;
+	flex-direction: column;
+	line-height: 1.3;
+	overflow: hidden;
+}
+.s-timer-label {
+	font-size: 0.85rem;
+	font-weight: 600;
+	color: var(--cream);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.s-timer-owner {
+	font-size: 0.62rem;
+	color: var(--dust);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+/* Urgentie status */
+.s-timer-item.urgent {
+	border-color: rgba(244, 81, 81, 0.35);
+	background: rgba(244, 81, 81, 0.09);
+}
+.s-timer-item.urgent .s-flip-card {
+	color: #ff6b6b;
+	background: linear-gradient(to bottom, #2b1414 0%, #1f0d0d 48%, #170808 52%, #120505 100%);
+	box-shadow: 0 0 10px rgba(244, 81, 81, 0.15);
+}
+
+/* Vlijmscherpe 3D Flip Animatie */
+@keyframes s-flip-down {
+	0% {
+		transform: rotateX(-18deg);
+		filter: brightness(1.3);
+	}
+	100% {
+		transform: rotateX(0deg);
+		filter: brightness(1);
+	}
+}
+@keyframes s-pulse {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0.35; }
+}
+
 /* ============ LEADERBOARD COMPONENTS ============ */
-/* LEADERBOARD */
 .scherm-lb {
   flex-shrink: 0; 
   z-index: 10;
@@ -141,7 +282,6 @@
   font-family: 'Space Mono', monospace;
 }
 
-/* Bottom Grid for Remaining Members */
 .lb-rest-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -183,7 +323,6 @@
 .lb-strip-times .total { color: var(--cream); }
 .lb-strip-times .session { color: var(--amber); margin-top: 0.1rem; }
 
-/* RESPONSIVE LAYOUT BREAKPOINTS */
 @media (max-width: 680px) {
 	.lb-top3 {
 		flex-direction: column;
