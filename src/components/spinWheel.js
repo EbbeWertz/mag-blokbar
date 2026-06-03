@@ -43,14 +43,17 @@ function renderActs() {
 
 async function launchSpin() {
   if (!state.activities.length) return alert('Voeg eerst activiteiten toe!');
+  // Trigger het event in de database
   await dbUpsert('blokbar_state', { key: 'spinning', value: '1' });
-  doSpin();
 }
 
 export function doSpin() {
   if (!state.activities.length) return;
   const overlay = document.getElementById('spin-overlay');
   if (!overlay) return; // Clean exit if fired where canvas element does not exist
+
+  // VOORKOM DUBBELE TRIGGERS: Als het wiel al draait, negeer nieuwe database-pings
+  if (overlay.classList.contains('on')) return;
   
   overlay.classList.add('on');
   document.getElementById('spin-result').textContent = '';
@@ -63,6 +66,10 @@ export function doSpin() {
   const spin = Math.PI * 2 * 6 + Math.random() * Math.PI * 2;
   const t0 = performance.now();
   const dur = 4200;
+
+  // RESET DATABASE TRIGGER DIRECT: Zet de state meteen terug naar '0' zodat andere
+  // database updates (zoals playlist/tijd synchronisaties) de doSpin() niet opnieuw starten.
+  dbUpsert('blokbar_state', { key: 'spinning', value: '0' }).catch(console.error);
 
   function draw(a) {
     const W = canvas.width, cx = W / 2, cy = W / 2, r = cx - 10;
@@ -102,10 +109,9 @@ export function doSpin() {
     document.getElementById('spin-result').textContent = '🎯 ' + labels[winner];
 
     // --- AUTOMATIC CLOSE TRIGGER ---
-    // Wait for 5 seconds after the wheel has landed, then dismiss automatically
-    setTimeout(async () => {
+    // Sluit de overlay na 5 seconden. De database hoeft niet meer geüpdatet te worden, want dat is al gebeurd!
+    setTimeout(() => {
       overlay.classList.remove('on');
-      await dbUpsert('blokbar_state', { key: 'spinning', value: '0' });
     }, 5000);
   }
   requestAnimationFrame(frame);
