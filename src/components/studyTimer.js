@@ -10,10 +10,15 @@ export function initStudyTimer() {
 
   // Live active display loop
   setInterval(() => {
-    const el = document.getElementById('d-time');
-    if (el) {
+    const el_sesh = document.getElementById('d-time-session');
+    const el_tot = document.getElementById('d-time-total');
+    if (el_sesh) {
       // Display current session time as the primary visual block count
-      el.textContent = fmtSec(getSessionSecs());
+      el_sesh.textContent = fmtSec(getSessionSecs());
+    }
+    if (el_tot) {
+      // Display current session time as the primary visual block count
+      el_tot.textContent = fmtSec(getTotalSecs());
     }
   }, 1000);
 }

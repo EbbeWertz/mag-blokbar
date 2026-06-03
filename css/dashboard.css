@@ -124,6 +124,14 @@
 	line-height: 1;
 	flex: 1;
 }
+.study-time-total{
+	font-size: 1rem;
+	color: var(--blue);
+}
+.study-time-total-lbl{
+	font-size: 0.62rem;
+	color: var(--dust);
+}
 .dot {
 	width: 8px;
 	height: 8px;

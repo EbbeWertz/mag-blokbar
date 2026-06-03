@@ -54,7 +54,12 @@
                         <div id="d-dot" class="dot"></div>
                     </div>
                     <div class="study-row">
-                        <div id="d-time" class="study-time">0:00:00</div>
+                        <div id="d-time-session" class="study-time">0:00:00</div>
+                        <div>
+                            <span class="study-time-total-lbl">Totaal:</span>
+                            <div class="study-time-total" id="d-time-total">0:00:00</div>
+
+                        </div>
                         <div id="d-state" class="study-state">Gestopt</div>
                         <button id="d-study-btn" class="btn-action btn-go">▶ Start</button>
                     </div>
@@ -95,8 +100,8 @@
                     </div>
                     <div class="add-row" style="flex-wrap:wrap;gap:0.4rem;">
                         <!-- Opgeschorst conform uitsluiting raw paths -->
-                        <input type="text" class="inp" id="p-url"
-                            placeholder="YouTube video of playlist URL..." style="margin:0;flex:1 1 200px;">
+                        <input type="text" class="inp" id="p-url" placeholder="YouTube video of playlist URL..."
+                            style="margin:0;flex:1 1 200px;">
                         <input type="text" class="inp" id="p-title" placeholder="Naam..."
                             style="margin:0;flex:0 0 120px;">
                         <button class="btn-sm" id="d-playlist-add">+ Toevoegen</button>

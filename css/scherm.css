@@ -29,10 +29,12 @@
 }
 .scherm-hint {
 	margin-left: auto;
-	font-size: 0.6rem;
-	color: rgba(244, 238, 217, 0.35);
+	font-size: 1rem;
+	background-color: rgba(0, 0, 0, 0.35);
+	border-radius: 0.5rem;
+	padding-top: 0.7rem;
+	padding-inline: 0.5rem;
 	text-align: right;
-	line-height: 1.8;
 }
 
 /* ============ CENTER CLOCK & QUOTES ============ */
