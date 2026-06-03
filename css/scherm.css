@@ -327,3 +327,21 @@
 		flex-direction: column;
 	}
 }
+/* ============ VIDEO HELDERHEID REPARATIE ============ */
+
+#bg-layer {
+    background: transparent !important;
+    filter: none !important; /* Verwijdert eventuele brightness filters */
+}
+
+#bg-iframe, 
+#bg-layer iframe {
+    opacity: 1 !important;
+    filter: brightness(1) contrast(1) !important;
+}
+
+#bg-overlay {
+    background: transparent !important;
+    background-color: transparent !important;
+    pointer-events: none;
+}
