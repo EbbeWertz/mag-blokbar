@@ -56,16 +56,24 @@ async function addTimer() {
 function renderTimers() {
   const el = document.getElementById('d-timers');
   if (!el) return;
-  if (!state.timers.length) { el.innerHTML = '<div class="empty-msg">Geen actieve timers.</div>'; return; }
+
+  // VERANDERING: Filter de timers zodat alleen timers van de huidige gebruiker (myId) worden getoond
+  const myTimers = state.timers.filter(t => t.owner_id === state.myId);
   
-  el.innerHTML = state.timers.map(t => {
+  if (!myTimers.length) { 
+    el.innerHTML = '<div class="empty-msg">Geen actieve timers van jou.</div>'; 
+    return; 
+  }
+  
+  // Renders nu op basis van de gefilterde 'myTimers' array
+  el.innerHTML = myTimers.map(t => {
     const rem = Math.max(0, Math.round((new Date(t.ends_at).getTime() - Date.now()) / 1000));
     const urg = rem < 60;
     return `<div class="item-row">
       <div class="item-label">${t.label}</div>
       <div class="item-meta">${t.owner_name}</div>
       <div class="timer-left ${urg ? 'urgent' : ''}" data-ends="${t.ends_at}">${fmtSec(rem)}</div>
-      ${t.owner_id === state.myId ? `<button class="btn-sm del" onclick="delTimer('${t.id}')">✕</button>` : ''}
+      <button class="btn-sm del" onclick="delTimer('${t.id}')">✕</button>
     </div>`;
   }).join('');
 }
