@@ -1,6 +1,6 @@
 import { state, setMyName, SUPA_URL } from '../shared/config.js';
 import { dbUpsert, dbGet } from '../shared/db.js';
-import { fmtSec, fmtMin, notify } from '../shared/utils.js';
+import { fmtMin, notify } from '../shared/utils.js';
 
 export function initIdentity(isDashboard = true) {
   if (isDashboard) {
@@ -140,8 +140,8 @@ function renderLb(sorted) {
           <span class="lb-strip-rank">#${rank}</span>
           <span class="lb-strip-name">${u.name}</span>
           <div class="lb-strip-times">
-            <span class="total">Totaal: ${fmtSec(u.total_seconds)}</span>
-            ${isOnline ? `<span class="session">${statusIcon} ${fmtSec(u.session_seconds)}</span>` : ''}
+            <span class="total">Totaal: ${fmtMin(u.total_seconds)}</span>
+            ${isOnline ? `<span class="session">${statusIcon} ${fmtMin(u.session_seconds)}</span>` : ''}
           </div>
         </div>`;
     }).join('') : '';
@@ -169,7 +169,7 @@ function renderOnline(allUsers) {
       <div class="online-item">
         <div class="dot ${dotClass}" style="margin:0; flex-shrink:0;"></div>
         <div class="online-name${isMe ? ' me' : ''}">${u.name}${isMe ? ' (jij)' : ''} <span style="font-size:0.55rem; opacity:0.5;">[${statusLabel}]</span></div>
-        <div class="online-hrs">${fmtSec(u.session_seconds)}</div>
+        <div class="online-hrs">${fmtMin(u.session_seconds)}</div>
       </div>`;
   }).join('');
 }

@@ -2,6 +2,10 @@ import { state, setPlaylist, setPlayIdx, setIsMuted } from '../shared/config.js'
 import { dbGet, dbUpsert, dbDel } from '../shared/db.js';
 import { notify } from '../shared/utils.js';
 
+let playerInstance = null;
+let broadcastInterval = null;
+let currentVideoId = null;
+
 export function initPlaylist() {
   const addBtn = document.getElementById('d-playlist-add');
   const skipBtn = document.getElementById('d-skip');
@@ -31,7 +35,14 @@ export async function loadPlaylist() {
     dbIdx = 0;
   }
   setPlayIdx(dbIdx);  
-  renderPlaylist();
+  
+  // Pull live state time from DB to display on load
+  const curRow = dbState.find(s => s.key === 'yt_current_time');
+  const durRow = dbState.find(s => s.key === 'yt_total_duration');
+  const curTime = curRow ? parseFloat(curRow.value) : 0;
+  const totalDur = durRow ? parseFloat(durRow.value) : 0;
+
+  renderPlaylist(curTime, totalDur);
   setVideo();
 }
 
@@ -48,22 +59,27 @@ async function addPlaylist() {
 }
 
 export async function skipPlaylist() {
-  // If there is nothing to skip, exit
   if (!state.playlist.length) return;
-
-  // Find the video item currently playing
   const currentVideo = state.playlist[state.playIdx];
 
   if (currentVideo && currentVideo.id) {
-    // Instead of changing play_idx pointer, DELETE the current active video
+    await Promise.all([
+      dbUpsert('blokbar_state', { key: 'yt_current_time', value: '0' }),
+      dbUpsert('blokbar_state', { key: 'yt_total_duration', value: '0' })
+    ]);
     await dbDel('blokbar_playlist', currentVideo.id);
-    
-    // Explicitly update the local client state directly for snappy feedback
     await loadPlaylist();
   }
 }
 
-export function renderPlaylist() {
+function formatTime(seconds) {
+  if (isNaN(seconds) || seconds === undefined || seconds < 0) return '0:00';
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+}
+
+export function renderPlaylist(currentTime = 0, totalDuration = 0) {
   const el = document.getElementById('d-playlist');
   if (!el) return;
   if (!state.playlist.length) { 
@@ -71,62 +87,113 @@ export function renderPlaylist() {
     return; 
   }
   
-  el.innerHTML = state.playlist.map((item, i) => `
-    <div class="item-row${i === state.playIdx ? ' playing' : ''}">
-      ${i === state.playIdx ? '<div class="playing-pip"></div>' : ''}
-      <div class="item-label">${item.title || item.url}</div>
+  el.innerHTML = state.playlist.map((item, i) => {
+    const isPlaying = i === state.playIdx;
+    let durationLabel = '';
+    
+    if (isPlaying && totalDuration > 0) {
+      durationLabel = ` <span class="playtime-counter" style="font-size:0.75rem; opacity:0.7; font-family:monospace; margin-left:6px;">(${formatTime(currentTime)} / ${formatTime(totalDuration)})</span>`;
+    }
+
+    return `
+    <div class="item-row${isPlaying ? ' playing' : ''}">
+      ${isPlaying ? '<div class="playing-pip"></div>' : ''}
+      <div class="item-label">${item.title || item.url}${durationLabel}</div>
       <div class="item-meta">${item.added_by || ''}</div>
       <button class="btn-sm del" onclick="window.delPlaylist('${item.id}')">✕</button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 export function setVideo() {
-  if (!state.playlist.length) return;
-  const item = state.playlist[state.playIdx % state.playlist.length];
-  const vid = document.getElementById('bg-video');
   const ifr = document.getElementById('bg-iframe');
   const layer = document.getElementById('bg-layer');
-
+  
   if (!state.playlist.length) {
-    if (ifr) { ifr.src = ''; ifr.style.display = 'none'; }
-    if (vid) { vid.src = ''; vid.style.display = 'none'; try { vid.pause(); } catch(e){} }
+    if (broadcastInterval) { clearInterval(broadcastInterval); broadcastInterval = null; }
+    if (ifr) { ifr.style.display = 'none'; }
+    if (playerInstance && typeof playerInstance.stopVideo === 'function') { playerInstance.stopVideo(); }
     if (layer) layer.classList.remove('ready');
+    currentVideoId = null;
     return;
   }
 
-  if (!vid || !ifr) return; // Fail-safes cleanly on Dashboard page
+  const item = state.playlist[state.playIdx % state.playlist.length];
+  if (!ifr) return; // Safeguard if running inside Dashboard.js layout context
 
   const ytMatch = item.url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([a-zA-Z0-9_-]{11})/);
   if (ytMatch) {
     const id = ytMatch[1];
-    const muteParam = state.isMuted ? 1 : 0;
-    const src = `https://www.youtube.com/embed/${id}?autoplay=1&loop=1&playlist=${id}&mute=${muteParam}&controls=0&disablekb=1&modestbranding=1&iv_load_policy=3`;
-    if (ifr.src !== src) {
-      ifr.src = src;
-      ifr.style.display = 'block';
-      vid.style.display = 'none';
-      vid.src = '';
+    ifr.style.display = 'block';
+
+    // If player doesn't exist yet, initialize it once
+    if (!playerInstance) {
+      currentVideoId = id;
+      playerInstance = new YT.Player('bg-iframe', {
+        videoId: id,
+        playerVars: {
+          'autoplay': 1,
+          'mute': state.isMuted ? 1 : 0,
+          'controls': 0,
+          'disablekb': 1,
+          'modestbranding': 1,
+          'iv_load_policy': 3,
+          'loop': 1,
+          'playlist': id
+        },
+        events: {
+          'onReady': (event) => {
+            event.target.playVideo();
+            if (layer) layer.classList.add('ready');
+            startStateBroadcaster();
+          },
+          'onStateChange': async (event) => {
+            if (event.data === YT.PlayerState.ENDED) {
+              await skipPlaylist();
+            }
+          }
+        }
+      });
+    } else if (currentVideoId !== id) {
+      // If player already exists, change video using API commands directly to secure autoplay
+      currentVideoId = id;
+      if (typeof playerInstance.loadVideoById === 'function') {
+        playerInstance.loadVideoById({
+          videoId: id,
+          startSeconds: 0
+        });
+        if (layer) layer.classList.add('ready');
+        startStateBroadcaster();
+      }
     }
-    if (layer) layer.classList.add('ready');
-    return;
+  } else {
+    ifr.style.display = 'none';
+    if (playerInstance && typeof playerInstance.stopVideo === 'function') playerInstance.stopVideo();
+    if (layer) layer.classList.remove('ready');
+    currentVideoId = null;
   }
+}
 
-  if (item.url.includes('archive.org')) {
-    let src = item.url;
-    if (!src.includes('/embed/')) src = src.replace('/details/', '/embed/');
-    ifr.src = src; ifr.style.display = 'block'; vid.style.display = 'none'; vid.src = '';
-    if (layer) layer.classList.add('ready');
-    return;
-  }
-
-  ifr.style.display = 'none'; ifr.src = '';
-  vid.style.display = 'block';
-  if (vid.src !== item.url) {
-    vid.src = item.url;
-    vid.muted = true;
-    vid.play().catch(() => {});
-  }
-  if (layer) layer.classList.add('ready');
+function startStateBroadcaster() {
+  if (broadcastInterval) clearInterval(broadcastInterval);
+  
+  broadcastInterval = setInterval(async () => {
+    if (playerInstance && typeof playerInstance.getCurrentTime === 'function') {
+      try {
+        const current = playerInstance.getCurrentTime();
+        const duration = playerInstance.getDuration();
+        if (duration > 0) {
+          // Send live data across the database state table to any active dashboards
+          await Promise.all([
+            dbUpsert('blokbar_state', { key: 'yt_current_time', value: String(current) }),
+            dbUpsert('blokbar_state', { key: 'yt_total_duration', value: String(duration) })
+          ]);
+        }
+      } catch (err) {
+        console.debug("Broadcaster paused");
+      }
+    }
+  }, 1000);
 }
 
 async function toggleMute() {
@@ -144,6 +211,11 @@ export function applyMute() {
   }
   const banner = document.getElementById('mute-banner');
   if (banner) banner.classList.toggle('on', state.isMuted);
+
+  if (playerInstance && typeof playerInstance.mute === 'function') {
+    if (state.isMuted) playerInstance.mute();
+    else playerInstance.unMute();
+  }
 }
 
 export async function syncMute() {

@@ -91,11 +91,12 @@
                         <button class="btn-sm" id="d-skip">⏭ Volgende</button>
                     </div>
                     <div class="item-list" id="d-playlist">
-                        <div class="empty-msg">Geen video's. Voeg een YouTube of video URL toe.</div>
+                        <div class="empty-msg">Geen video's. Voeg een YouTube URL toe.</div>
                     </div>
                     <div class="add-row" style="flex-wrap:wrap;gap:0.4rem;">
+                        <!-- Opgeschorst conform uitsluiting raw paths -->
                         <input type="text" class="inp" id="p-url"
-                            placeholder="YouTube / Internet Archive / video URL..." style="margin:0;flex:1 1 200px;">
+                            placeholder="YouTube video of playlist URL..." style="margin:0;flex:1 1 200px;">
                         <input type="text" class="inp" id="p-title" placeholder="Naam..."
                             style="margin:0;flex:0 0 120px;">
                         <button class="btn-sm" id="d-playlist-add">+ Toevoegen</button>

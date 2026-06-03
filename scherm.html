@@ -12,6 +12,7 @@
         rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
     <link rel="stylesheet" href="css/shared.css">
     <link rel="stylesheet" href="css/scherm.css">
 </head>
@@ -20,9 +21,8 @@
 
 
     <div id="bg-layer">
-        <video id="bg-video" autoplay muted loop playsinline></video>
-        <iframe id="bg-iframe" frameborder="0" allow="autoplay;encrypted-media" allowfullscreen
-            style="display:none"></iframe>
+        <!-- Kept clean matching original DOM expectations, script replaces container safely -->
+        <div id="bg-iframe" style="display:none; width: 100vw; height: 100vh; pointer-events: none;"></div>
     </div>
     <div id="bg-overlay"></div>
 
@@ -35,15 +35,12 @@
 
     <div id="page-scherm" class="page active">
 
-        <div id="mute-banner">🔇 Stilte gevraagd — respecteer de mute. Vraag eerst vriendelijk als je het geluid wil
-            aanzetten.
-        </div>
+        <div id="mute-banner">🔇 Stilte gevraagd — respecteer de mute. Vraag eerst vriendelijk als je het geluid wil aanzetten.</div>
         <div class="scherm-top">
             <img src="assets/256_schild.png" class="scherm-logo" alt="Logo">
             <img src="assets/blokbar.svg" class="scherm-blokbar" alt="MAG BLOKBAR">
             <div class="scherm-hint">
-                Doe mee op: <strong><a id="domain_name" href="./"
-                        style="color: inherit; text-decoration: underline;">/</a></strong>
+                Doe mee op: <strong><a id="domain_name" href="./" style="color: inherit; text-decoration: underline;">/</a></strong>
 
                 <div id="qrcode" style="margin-top: 15px;"></div>
             </div>
@@ -59,10 +56,10 @@
         </div>
 
         <div class="scherm-lb">
-    <div class="lb-label">Klassement</div>
-    <div id="lb-top3" class="lb-top3"></div>
-    <div id="lb-rest-grid" class="lb-rest-grid"></div>
-  </div>
+            <div class="lb-label">Klassement</div>
+            <div id="lb-top3" class="lb-top3"></div>
+            <div id="lb-rest-grid" class="lb-rest-grid"></div>
+        </div>
     </div>
 
     <script type="module" src="./src/scherm.js"></script>
